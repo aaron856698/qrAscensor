@@ -12,6 +12,7 @@ const Login = ({ onLogin }) => {
   const [registerUser, setRegisterUser] = useState('');
   const [registerPass, setRegisterPass] = useState('');
   const [registerPass2, setRegisterPass2] = useState('');
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   useEffect(() => {
     // Si no hay usuario guardado, mostrar registro
@@ -19,6 +20,9 @@ const Login = ({ onLogin }) => {
     const savedPass = localStorage.getItem('qrapp_pass');
     if (!savedUser || !savedPass) {
       setIsRegister(true);
+    } else {
+      // Sugerir usuario guardado
+      setUsername(savedUser);
     }
   }, []);
 
@@ -57,6 +61,8 @@ const Login = ({ onLogin }) => {
       username.trim().toLowerCase() === savedUser &&
       password === savedPass
     ) {
+      setShowSavePrompt(true); // Mostrar mensaje propio
+      setTimeout(() => setShowSavePrompt(false), 4000);
       onLogin(true);
     } else {
       setError('Usuario o contraseña incorrectos');
@@ -262,9 +268,39 @@ const Login = ({ onLogin }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.7 }}
         >
-          <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: 24 }}>© 2024 Sistema QR</p>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: 24, fontWeight: 500 }}>
+            © 2025 · Desarrollador de software: Garcen Aaron<br/>
+            <span style={{ fontSize: '0.9rem', color: '#2563eb', fontWeight: 600 }}>
+              Soluciones digitales a tu medida
+            </span>
+          </p>
         </motion.div>
       </motion.div>
+      {showSavePrompt && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          style={{
+            position: 'fixed',
+            bottom: 32,
+            left: 0,
+            right: 0,
+            margin: '0 auto',
+            maxWidth: 340,
+            background: '#2563eb',
+            color: 'white',
+            borderRadius: 12,
+            padding: '1rem 1.5rem',
+            textAlign: 'center',
+            fontWeight: 600,
+            zIndex: 9999,
+            boxShadow: '0 4px 24px #2563eb44',
+          }}
+        >
+          ¿Desea guardar la contraseña en su navegador para autocompletar la próxima vez?
+        </motion.div>
+      )}
       <style>{`
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }
