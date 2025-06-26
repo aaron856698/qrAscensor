@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Building2 } from 'lucide-react';
+import { Eye, EyeOff, Building2, UserPlus } from 'lucide-react';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -8,17 +8,55 @@ const Login = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [registerUser, setRegisterUser] = useState('');
+  const [registerPass, setRegisterPass] = useState('');
+  const [registerPass2, setRegisterPass2] = useState('');
 
+  useEffect(() => {
+    // Si no hay usuario guardado, mostrar registro
+    const savedUser = localStorage.getItem('qrapp_user');
+    const savedPass = localStorage.getItem('qrapp_pass');
+    if (!savedUser || !savedPass) {
+      setIsRegister(true);
+    }
+  }, []);
+
+  // Registro de usuario
+  const handleRegister = (e) => {
+    e.preventDefault();
+    setError('');
+    if (!registerUser.trim() || !registerPass.trim()) {
+      setError('Usuario y contraseña requeridos');
+      return;
+    }
+    if (registerPass !== registerPass2) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+    localStorage.setItem('qrapp_user', registerUser.trim().toLowerCase());
+    localStorage.setItem('qrapp_pass', registerPass.trim());
+    setIsRegister(false);
+    setUsername(registerUser.trim());
+    setPassword(registerPass);
+    setRegisterUser('');
+    setRegisterPass('');
+    setRegisterPass2('');
+    setError('Usuario creado correctamente. Inicie sesión.');
+  };
+
+  // Login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
-    // Simular delay para mejor UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Credenciales hardcodeadas
-    if (username === 'conserjeria' && password === 'conserjeria3300') {
+    await new Promise(resolve => setTimeout(resolve, 700));
+    const savedUser = localStorage.getItem('qrapp_user');
+    const savedPass = localStorage.getItem('qrapp_pass');
+    if (
+      username.trim().toLowerCase() === savedUser &&
+      password === savedPass
+    ) {
       onLogin(true);
     } else {
       setError('Usuario o contraseña incorrectos');
@@ -72,85 +110,151 @@ const Login = ({ onLogin }) => {
           >
             <Building2 size={56} className="logo-icon" />
           </motion.div>
-          <h1 style={{ fontWeight: 800, fontSize: '2rem', color: '#2563eb', letterSpacing: 1 }}>Bienvenido</h1>
-          <p style={{ color: '#64748b', fontWeight: 500 }}>Sistema de Gestión de Códigos QR</p>
+          <h1 style={{ fontWeight: 800, fontSize: '2rem', color: '#2563eb', letterSpacing: 1 }}>{isRegister ? 'Crear Usuario' : 'Bienvenido'}</h1>
+          <p style={{ color: '#64748b', fontWeight: 500 }}>{isRegister ? 'Registre un usuario para acceder' : 'Sistema de Gestión de Códigos QR'}</p>
         </motion.div>
 
-        <motion.form 
-          onSubmit={handleSubmit}
-          className="login-form"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.7 }}
-        >
-          <div className="form-group">
-            <label htmlFor="username">Usuario</label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Ingrese su usuario"
-              required
-              className="form-input"
-              autoComplete="username"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <div className="password-input-container">
+        {isRegister ? (
+          <motion.form 
+            onSubmit={handleRegister}
+            className="login-form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.7 }}
+          >
+            <div className="form-group">
+              <label htmlFor="registerUser">Usuario</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Ingrese su contraseña"
+                type="text"
+                id="registerUser"
+                value={registerUser}
+                onChange={(e) => setRegisterUser(e.target.value)}
+                placeholder="Cree su usuario"
                 required
                 className="form-input"
-                autoComplete="current-password"
+                autoComplete="username"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="password-toggle"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
-          </div>
-
-          {error && (
-            <motion.div 
-              className="error-message"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              {error}
-            </motion.div>
-          )}
-
-          <motion.button
-            type="submit"
-            className="login-button"
-            disabled={isLoading}
-            whileHover={{ scale: 1.04, boxShadow: '0 4px 24px #2563eb44' }}
-            whileTap={{ scale: 0.98 }}
-            style={{ marginTop: 20, fontWeight: 700, fontSize: '1.1rem', letterSpacing: 1 }}
-          >
-            {isLoading ? (
-              <div className="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            ) : (
-              'Iniciar Sesión'
+            <div className="form-group">
+              <label htmlFor="registerPass">Contraseña</label>
+              <input
+                type="password"
+                id="registerPass"
+                value={registerPass}
+                onChange={(e) => setRegisterPass(e.target.value)}
+                placeholder="Cree su contraseña"
+                required
+                className="form-input"
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="registerPass2">Repetir Contraseña</label>
+              <input
+                type="password"
+                id="registerPass2"
+                value={registerPass2}
+                onChange={(e) => setRegisterPass2(e.target.value)}
+                placeholder="Repita la contraseña"
+                required
+                className="form-input"
+                autoComplete="new-password"
+              />
+            </div>
+            {error && (
+              <motion.div 
+                className="error-message"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                {error}
+              </motion.div>
             )}
-          </motion.button>
-        </motion.form>
+            <motion.button
+              type="submit"
+              className="login-button"
+              whileHover={{ scale: 1.04, boxShadow: '0 4px 24px #2563eb44' }}
+              whileTap={{ scale: 0.98 }}
+              style={{ marginTop: 20, fontWeight: 700, fontSize: '1.1rem', letterSpacing: 1 }}
+            >
+              <UserPlus size={18} style={{ marginRight: 8 }} /> Crear Usuario
+            </motion.button>
+          </motion.form>
+        ) : (
+          <motion.form 
+            onSubmit={handleSubmit}
+            className="login-form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.7 }}
+          >
+            <div className="form-group">
+              <label htmlFor="username">Usuario</label>
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ingrese su usuario"
+                required
+                className="form-input"
+                autoComplete="username"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="password">Contraseña</label>
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Ingrese su contraseña"
+                  required
+                  className="form-input"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="password-toggle"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+            {error && (
+              <motion.div 
+                className="error-message"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                {error}
+              </motion.div>
+            )}
+            <motion.button
+              type="submit"
+              className="login-button"
+              disabled={isLoading}
+              whileHover={{ scale: 1.04, boxShadow: '0 4px 24px #2563eb44' }}
+              whileTap={{ scale: 0.98 }}
+              style={{ marginTop: 20, fontWeight: 700, fontSize: '1.1rem', letterSpacing: 1 }}
+            >
+              {isLoading ? (
+                <div className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </motion.button>
+          </motion.form>
+        )}
 
         <motion.div 
           className="login-footer"
